@@ -197,6 +197,40 @@
   textarea.q-input:focus { outline: none; border-color: #001B66; background: #fff; }
   .header { border-radius: 10px; }
   #screen-intro, #screen-form, #screen-thanks { margin-top: 16px; }
+
+  /* ===== Lámina: nuevos riesgos ===== */
+  .lam-title { text-align: center; font-size: 22px; font-weight: 700; color: #001B66; margin-bottom: 22px; line-height: 1.4; }
+  .lam-group { margin-bottom: 8px; }
+  .lam-group + .lam-group { border-top: 2px solid #e8ecfe; padding-top: 22px; margin-top: 22px; }
+  .lam-rowtitle { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8a96b8; margin-bottom: 10px; }
+  .lam-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .lam-cell { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+  .lam-head { font-size: 14px; font-weight: 700; color: #001B66; }
+  .lam-arrow { margin: 6px 0; display: block; }
+  .lam-pre { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  textarea.lam-box { width: 100%; min-height: 120px; border: 1.5px solid #b9c6fa; border-radius: 6px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; background: #fffdf5; }
+  textarea.lam-box:focus { outline: none; border-color: #001B66; background: #fff; }
+  textarea.lam-box.err { border-color: #AF1414; background: #fdf2f2; }
+  .form-error { color: #AF1414; background: #fdecec; border: 1.5px solid #f3b6b6; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 700; margin-top: 16px; }
+  @media(max-width:640px){ .lam-row { grid-template-columns: 1fr; gap: 14px; } .lam-title { font-size: 19px; } }
+
+  /* ===== Modo facilitador ===== */
+  .fac-footer { text-align: right; margin-top: 22px; }
+  .fac-footer a { font-size: 12px; color: #001B66; text-decoration: underline; cursor: pointer; }
+  .auth-box { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; border: 1.5px solid #b9c6fa; background: #f5f7ff; border-radius: 8px; padding: 16px 18px; }
+  .auth-text { flex: 1 1 280px; font-size: 13px; color: #333; line-height: 1.5; }
+  .auth-text b { color: #001B66; font-size: 15px; }
+  .auth-box .fac-main-btn { flex: 0 1 300px; }
+  .fac-main-btn.done, .fac-main-btn.done:disabled { background: #1a7340; cursor: default; }
+  .tbl-wrap { overflow-x: auto; margin-top: 8px; }
+  .tbl-wrap td { vertical-align: top; word-break: break-word; }
+  .modal { position: fixed; inset: 0; background: rgba(0,27,102,.45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+  .modal-box { background: #fff; border-radius: 10px; padding: 24px 26px; width: 100%; max-width: 340px; box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+  .modal-box h3 { color: #001B66; font-size: 16px; margin-bottom: 6px; }
+  .modal-box p { font-size: 13px; color: #555; margin-bottom: 12px; }
+  .modal-box input { width: 100%; border: 1.5px solid #b9c6fa; border-radius: 6px; padding: 10px 12px; font-size: 18px; letter-spacing: 6px; text-align: center; background: #fffdf5; }
+  .modal-box input:focus { outline: none; border-color: #001B66; background: #fff; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -214,6 +248,7 @@
     <div class="subtitle">Ingeniería de Detalle: Proyecto Sistema de Agua Recirculada (SAR)</div>
   </div>
 
+  <div id="participant-flow">
   <!-- PANTALLA 1: Portada / registro -->
   <div id="screen-intro" class="expert-box">
     <h3>Datos del Participante</h3>
@@ -225,98 +260,137 @@
     <button class="btn-start" id="btn-start" onclick="startSession()">Registrarme</button>
   </div>
 
-  <!-- PANTALLA 1B: Mensaje tras el registro -->
+  <!-- PANTALLA 1B: Mensaje tras el registro (espera autorización del facilitador) -->
   <div id="screen-wait" class="summary-box hidden" style="margin-top:16px">
     <h2>✔ Registro exitoso</h2>
     <p style="font-size:16px;color:#1a2636;font-weight:600;margin-bottom:0">¡Gracias por tu participación!<br>En breve continuaremos con la presentación</p>
   </div>
 
-  <!-- PANTALLA 2: Pregunta -->
-  <div id="screen-form" class="risk-card hidden">
-    <div class="q-group">
-      <div class="q-title">¿Qué otros riesgos te gustaría visualizar en el Taller final?</div>
-      <div class="q-block">
-        <select class="q-select" id="resp-r1">
-          <option value="">Seleccione un riesgo...</option>
-          <option value="R2: Falta de ratificación de la Resolución de Calificación Ambiental (RCA)">R2: Falta de ratificación de la Resolución de Calificación Ambiental (RCA)</option>
-          <option value="R3: Falla en el sostenimiento / deformación excesiva / derrumbe en túneles">R3: Falla en el sostenimiento / deformación excesiva / derrumbe en túneles</option>
-          <option value="R4: Evento extremo en sectores trazado de impulsión (aluvión, avalancha, caída de roca y deslizamiento)">R4: Evento extremo en sectores trazado de impulsión (aluvión, avalancha, caída de roca y deslizamiento)</option>
-          <option value="R5: Alto nivel de interferencia con la operación del STR durante la construcción">R5: Alto nivel de interferencia con la operación del STR durante la construcción</option>
-          <option value="R6: Accidente grave o fatal">R6: Accidente grave o fatal</option>
-          <option value="R7: Afectación en hallazgos arqueológicos y/o nuevos hallazgos no previstos">R7: Afectación en hallazgos arqueológicos y/o nuevos hallazgos no previstos</option>
-          <option value="R9: Retraso en el inicio de operación">R9: Retraso en el inicio de operación</option>
-          <option value="R11: Detenciones y menor rendimiento de trabajos por condiciones de invierno">R11: Detenciones y menor rendimiento de trabajos por condiciones de invierno</option>
-          <option value="R13: Impacto en componentes ambientales asociados a flora, vegetación, fauna, cursos de agua y aire">R13: Impacto en componentes ambientales asociados a flora, vegetación, fauna, cursos de agua y aire</option>
-          <option value="R15: Inadecuada planificación de la PEM / PO">R15: Inadecuada planificación de la PEM / PO</option>
-          <option value="R16: Insuficiente consideración de alcances de PEM/PO en Estudios">R16: Insuficiente consideración de alcances de PEM/PO en Estudios</option>
-          <option value="R17: Subestimación de las necesidades de mantenimiento del sistema">R17: Subestimación de las necesidades de mantenimiento del sistema</option>
-          <option value="R18: Desviaciones en el Capex del proyecto durante la ejecución">R18: Desviaciones en el Capex del proyecto durante la ejecución</option>
-          <option value="R20: Asignación de contratista con baja calidad operativa o riesgo financiero">R20: Asignación de contratista con baja calidad operativa o riesgo financiero</option>
-        </select>
-      </div>
-      <div class="q-just">Justificación</div>
-      <div class="q-block">
-        <textarea class="q-input" id="resp-j1" placeholder="Comente brevemente por qué le interesa visualizar este riesgo..."></textarea>
+  <!-- PANTALLA 2: Lámina nuevos riesgos -->
+  <div id="screen-form" class="risk-card hidden" style="margin-top:16px">
+    <div class="lam-title">¿Qué otros riesgos estima necesario incorporar?</div>
+    <div class="lam-group">
+      <div class="lam-rowtitle">Riesgo 1</div>
+      <div class="lam-row">
+        <div class="lam-cell">
+          <div class="lam-head">El riesgo</div>
+          <svg class="lam-arrow" viewBox="0 0 20 40" width="20" height="40" aria-hidden="true"><path d="M7 0h6v26h6L10 40 1 26h6z" fill="#001B66"/></svg>
+          <div class="lam-pre">Podría ocurrir que</div>
+          <textarea class="lam-box" id="f-0-riesgo" data-i="0" data-campo="riesgo"></textarea>
+        </div>
+        <div class="lam-cell">
+          <div class="lam-head">Causa(s)</div>
+          <svg class="lam-arrow" viewBox="0 0 20 40" width="20" height="40" aria-hidden="true"><path d="M7 0h6v26h6L10 40 1 26h6z" fill="#001B66"/></svg>
+          <div class="lam-pre">debido a</div>
+          <textarea class="lam-box" id="f-0-causa" data-i="0" data-campo="causa"></textarea>
+        </div>
+        <div class="lam-cell">
+          <div class="lam-head">Consecuencia(s)</div>
+          <svg class="lam-arrow" viewBox="0 0 20 40" width="20" height="40" aria-hidden="true"><path d="M7 0h6v26h6L10 40 1 26h6z" fill="#001B66"/></svg>
+          <div class="lam-pre">Lo que provocaría</div>
+          <textarea class="lam-box" id="f-0-consecuencia" data-i="0" data-campo="consecuencia"></textarea>
+        </div>
       </div>
     </div>
-    <div class="q-group">
-      <div class="q-title">¿Qué otros riesgos te gustaría visualizar en el Taller final?</div>
-      <div class="q-block">
-        <select class="q-select" id="resp-r2">
-          <option value="">Seleccione un riesgo...</option>
-          <option value="R2: Falta de ratificación de la Resolución de Calificación Ambiental (RCA)">R2: Falta de ratificación de la Resolución de Calificación Ambiental (RCA)</option>
-          <option value="R3: Falla en el sostenimiento / deformación excesiva / derrumbe en túneles">R3: Falla en el sostenimiento / deformación excesiva / derrumbe en túneles</option>
-          <option value="R4: Evento extremo en sectores trazado de impulsión (aluvión, avalancha, caída de roca y deslizamiento)">R4: Evento extremo en sectores trazado de impulsión (aluvión, avalancha, caída de roca y deslizamiento)</option>
-          <option value="R5: Alto nivel de interferencia con la operación del STR durante la construcción">R5: Alto nivel de interferencia con la operación del STR durante la construcción</option>
-          <option value="R6: Accidente grave o fatal">R6: Accidente grave o fatal</option>
-          <option value="R7: Afectación en hallazgos arqueológicos y/o nuevos hallazgos no previstos">R7: Afectación en hallazgos arqueológicos y/o nuevos hallazgos no previstos</option>
-          <option value="R9: Retraso en el inicio de operación">R9: Retraso en el inicio de operación</option>
-          <option value="R11: Detenciones y menor rendimiento de trabajos por condiciones de invierno">R11: Detenciones y menor rendimiento de trabajos por condiciones de invierno</option>
-          <option value="R13: Impacto en componentes ambientales asociados a flora, vegetación, fauna, cursos de agua y aire">R13: Impacto en componentes ambientales asociados a flora, vegetación, fauna, cursos de agua y aire</option>
-          <option value="R15: Inadecuada planificación de la PEM / PO">R15: Inadecuada planificación de la PEM / PO</option>
-          <option value="R16: Insuficiente consideración de alcances de PEM/PO en Estudios">R16: Insuficiente consideración de alcances de PEM/PO en Estudios</option>
-          <option value="R17: Subestimación de las necesidades de mantenimiento del sistema">R17: Subestimación de las necesidades de mantenimiento del sistema</option>
-          <option value="R18: Desviaciones en el Capex del proyecto durante la ejecución">R18: Desviaciones en el Capex del proyecto durante la ejecución</option>
-          <option value="R20: Asignación de contratista con baja calidad operativa o riesgo financiero">R20: Asignación de contratista con baja calidad operativa o riesgo financiero</option>
-        </select>
-      </div>
-      <div class="q-just">Justificación</div>
-      <div class="q-block">
-        <textarea class="q-input" id="resp-j2" placeholder="Comente brevemente por qué le interesa visualizar este riesgo..."></textarea>
+    <div class="lam-group">
+      <div class="lam-rowtitle">Riesgo 2 (opcional)</div>
+      <div class="lam-row">
+        <div class="lam-cell">
+          <div class="lam-head">El riesgo</div>
+          <svg class="lam-arrow" viewBox="0 0 20 40" width="20" height="40" aria-hidden="true"><path d="M7 0h6v26h6L10 40 1 26h6z" fill="#001B66"/></svg>
+          <div class="lam-pre">Podría ocurrir que</div>
+          <textarea class="lam-box" id="f-1-riesgo" data-i="1" data-campo="riesgo"></textarea>
+        </div>
+        <div class="lam-cell">
+          <div class="lam-head">Causa(s)</div>
+          <svg class="lam-arrow" viewBox="0 0 20 40" width="20" height="40" aria-hidden="true"><path d="M7 0h6v26h6L10 40 1 26h6z" fill="#001B66"/></svg>
+          <div class="lam-pre">debido a</div>
+          <textarea class="lam-box" id="f-1-causa" data-i="1" data-campo="causa"></textarea>
+        </div>
+        <div class="lam-cell">
+          <div class="lam-head">Consecuencia(s)</div>
+          <svg class="lam-arrow" viewBox="0 0 20 40" width="20" height="40" aria-hidden="true"><path d="M7 0h6v26h6L10 40 1 26h6z" fill="#001B66"/></svg>
+          <div class="lam-pre">Lo que provocaría</div>
+          <textarea class="lam-box" id="f-1-consecuencia" data-i="1" data-campo="consecuencia"></textarea>
+        </div>
       </div>
     </div>
+    <div class="form-error hidden" id="form-error"></div>
     <div class="nav-area single">
       <button class="btn-nav btn-next" id="btn-send" onclick="sendResponse()">Enviar respuesta →</button>
     </div>
   </div>
 
   <!-- PANTALLA 3: Cierre -->
-  <div id="screen-thanks" class="summary-box hidden">
+  <div id="screen-thanks" class="summary-box hidden" style="margin-top:16px">
     <h2>✔ Respuesta registrada</h2>
     <p>Gracias por su participación.</p>
     <a href="#" onclick="changeParticipant();return false;" style="font-size:12px;color:#5271FF">¿Otro participante en este dispositivo? Registrar</a>
   </div>
+  </div><!-- /participant-flow -->
+
+  <!-- ===================== PANEL FACILITADOR ===================== -->
+  <div id="facilitator-view" class="fac-wrap hidden">
+    <div class="fac-card">
+      <div class="fac-top">
+        <div class="fac-title">Panel del Facilitador</div>
+        <div class="fac-status"><span class="fac-pill off" id="fac-pill-sec">—</span></div>
+      </div>
+      <div class="auth-box">
+        <div class="auth-text"><b>Autorizar ingreso a la sección «Nuevos riesgos»</b><br>Autorice el ingreso <u>después de que los asistentes se hayan registrado</u>: verán en sus pantallas la lámina «¿Qué otros riesgos estima necesario incorporar?».</div>
+        <button class="fac-main-btn" id="fac-auth-btn" onclick="setAutorizacion(true)">▶ Autorizar ingreso a esta sección</button>
+      </div>
+      <div class="fac-controls">
+        <button class="fac-sec-btn" onclick="refreshFac()">🔄 Actualizar resultados</button>
+        <button class="fac-sec-btn danger hidden" id="fac-revoke-btn" onclick="setAutorizacion(false)">↩ Revocar autorización</button>
+      </div>
+    </div>
+    <div class="fac-card" id="fac-results"></div>
+  </div>
+
+  <div class="fac-footer"><a id="fac-link" onclick="toggleFacilitador()">Modo facilitador</a></div>
+</div>
+
+<!-- Modal PIN -->
+<div id="pin-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Modo facilitador</h3>
+    <p>Ingrese el PIN para continuar.</p>
+    <input type="password" id="pin-input" inputmode="numeric" autocomplete="off" maxlength="12">
+    <div class="form-error hidden" id="pin-error" style="margin-top:12px"></div>
+    <div class="modal-actions">
+      <button class="fac-sec-btn" onclick="closePin()">Cancelar</button>
+      <button class="btn-nav btn-next" id="pin-ok" onclick="submitPin()">Ingresar</button>
+    </div>
+  </div>
 </div>
 <div id="toast"></div>
-
 <script>
 /* ===================== CONFIGURACIÓN ===================== */
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyswfunW2gzrtN6O4H1KJ_KfytLSdzGHh-FchdB0Oikp6CrtvgHjrS-qF4HbNE38r0Jrw/exec';
-const LS_KEY = 'sar_taller_final_v2';
+const LS_KEY = 'sar_taller_final_v3';
+const POLL_MS = 4000;          // consulta al servidor (participantes y facilitador)
+const CAMPOS = ['riesgo', 'causa', 'consecuencia'];
+const MSG_INCOMPLETO = 'Es necesario completar los 3 cuadros (riesgo, causa y consecuencia) para ingresar el riesgo.';
 
 /* ===================== ESTADO ===================== */
+const blank = () => ({ riesgo: '', causa: '', consecuencia: '' });
+const EMPTY = () => ({ items: [blank(), blank()], sent: false });
 let participant = { nombre: '', cargo: '', empresa: '' };
 let registered = false;
-const EMPTY = () => ({ r1: '', j1: '', r2: '', j2: '', sent: false });
 let resp = EMPTY();
-const FIELDS = ['r1','j1','r2','j2'];
-const PREGUNTA = '¿Qué otros riesgos te gustaría visualizar en el Taller final?';
+let autorizado = false;        // sección «Nuevos riesgos» autorizada por el facilitador
+let currentScreen = null;
+let isFac = false, facPin = '', facTimer = null, facData = null;
 
 function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ participant, registered, resp })); } catch (e) {} }
 function loadLocal() {
   try {
     const d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-    if (d) { participant = d.participant || participant; registered = !!d.registered; resp = Object.assign(EMPTY(), d.resp || {}); }
+    if (d) {
+      participant = d.participant || participant; registered = !!d.registered;
+      if (d.resp && Array.isArray(d.resp.items) && d.resp.items.length === 2) resp = d.resp;
+    }
   } catch (e) {}
 }
 function clearLocal() {
@@ -326,32 +400,54 @@ function clearLocal() {
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  clearTimeout(showToast._t); showToast._t = setTimeout(() => t.classList.remove('show'), 3500);
+  clearTimeout(showToast._t); showToast._t = setTimeout(() => t.classList.remove('show'), 5000);
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function apiGet(params) {
+  const res = await fetch(SHEET_URL + '?' + params + '&t=' + Date.now());
+  return res.json();
+}
 async function apiPost(body) {
   const res = await fetch(SHEET_URL, { method: 'POST', body: JSON.stringify(body) });
   try { return await res.json(); } catch (e) { return { ok: true }; }
 }
 
-/* ===================== FLUJO ===================== */
-function render() {
-  const show = id => ['screen-intro','screen-wait','screen-form','screen-thanks'].forEach(s =>
+/* ===================== PARTICIPANTE ===================== */
+function show(id) {
+  ['screen-intro','screen-wait','screen-form','screen-thanks'].forEach(s =>
     document.getElementById(s).classList.toggle('hidden', s !== id));
-  if (!registered) { show('screen-intro'); return; }
-  if (resp.sent) { show('screen-thanks'); return; }
-  // Tras el registro se muestra el mensaje de espera; la hoja de preguntas se abre con el enlace ...#preguntas
-  if (location.hash !== '#preguntas') { show('screen-wait'); return; }
-  show('screen-form');
-  FIELDS.forEach(f => document.getElementById('resp-' + f).value = resp[f]);
-  syncOptions();
+}
+function render() {
+  if (isFac) return;
+  let target;
+  if (!registered) target = 'screen-intro';
+  else if (resp.sent) target = 'screen-thanks';
+  else if (!autorizado) target = 'screen-wait';
+  else target = 'screen-form';
+  if (target === 'screen-form' && currentScreen !== 'screen-form') fillForm();
+  show(target); currentScreen = target;
+}
+function fieldEl(i, c) { return document.getElementById('f-' + i + '-' + c); }
+function fillForm() {
+  resp.items.forEach((it, i) => CAMPOS.forEach(c => fieldEl(i, c).value = it[c]));
+  clearErrors();
+}
+function clearErrors() {
+  document.querySelectorAll('textarea.lam-box.err').forEach(el => el.classList.remove('err'));
+  document.getElementById('form-error').classList.add('hidden');
 }
 
-// Evita elegir el mismo riesgo en ambos bloques
-function syncOptions() {
-  const a = document.getElementById('resp-r1'), b = document.getElementById('resp-r2');
-  [[a, b.value], [b, a.value]].forEach(([sel, other]) => Array.from(sel.options).forEach(o => o.disabled = !!other && o.value === other));
+async function pollEstado() {
+  if (isFac || !registered || resp.sent) return;
+  try {
+    const d = await apiGet('action=estado');
+    if (d && d.ok) {
+      const a = !!d.autorizado;
+      if (a !== autorizado) { autorizado = a; render(); }
+    }
+  } catch (e) { console.error('Error consultando estado:', e); }
 }
+async function pollLoop() { await pollEstado(); setTimeout(pollLoop, POLL_MS); }
 
 async function startSession() {
   const nombre = document.getElementById('exp-nombre').value.trim();
@@ -360,34 +456,57 @@ async function startSession() {
   if (!nombre || !cargo || !empresa) { showToast('⚠ Complete los datos del participante.'); return; }
   const btn = document.getElementById('btn-start'); btn.disabled = true;
   try {
-    await apiPost({ action: 'register', nombre, cargo, empresa });
+    const r = await apiPost({ action: 'register', nombre, cargo, empresa });
+    if (r && r.ok === false) throw new Error(r.error || 'registro');
     participant = { nombre, cargo, empresa };
-    registered = true;
-    resp = EMPTY();
-    saveLocal();
-    render();
+    registered = true; resp = EMPTY(); currentScreen = null;
+    saveLocal(); render(); pollEstado();
   } catch (e) {
     console.error(e); showToast('⚠ No se pudo conectar con el servidor. Intente nuevamente.');
   }
   btn.disabled = false;
 }
 
+function collect() {
+  resp.items.forEach((it, i) => CAMPOS.forEach(c => it[c] = fieldEl(i, c).value.trim()));
+}
+function validar() {
+  collect(); clearErrors();
+  let ok = true;
+  resp.items.forEach((it, i) => {
+    const llenos = CAMPOS.filter(c => it[c]).length;
+    const obligatorio = (i === 0);
+    if ((obligatorio && llenos < 3) || (!obligatorio && llenos > 0 && llenos < 3)) {
+      ok = false;
+      CAMPOS.forEach(c => { if (!it[c]) fieldEl(i, c).classList.add('err'); });
+    }
+  });
+  if (!ok) {
+    const box = document.getElementById('form-error');
+    box.textContent = '⚠ ' + MSG_INCOMPLETO; box.classList.remove('hidden');
+    showToast('⚠ ' + MSG_INCOMPLETO);
+    const first = document.querySelector('textarea.lam-box.err'); if (first) first.focus();
+  }
+  return ok;
+}
+
 async function sendResponse() {
-  FIELDS.forEach(f => resp[f] = document.getElementById('resp-' + f).value.trim());
-  if (!resp.r1) { showToast('⚠ Seleccione el riesgo del primer bloque.'); return; }
-  if (!resp.j1) { showToast('⚠ Complete la justificación del primer bloque.'); return; }
-  if ((resp.r2 && !resp.j2) || (!resp.r2 && resp.j2)) { showToast('⚠ En el segundo bloque complete el riesgo y su justificación (o deje ambos vacíos).'); return; }
+  if (!validar()) return;
+  const riesgos = resp.items.filter(it => CAMPOS.every(c => it[c]));
   const btn = document.getElementById('btn-send'); btn.disabled = true;
   try {
     const res = await apiPost({
       action: 'submit_riesgos_taller',
       nombre: participant.nombre, cargo: participant.cargo, empresa: participant.empresa,
-      pregunta: PREGUNTA,
-      riesgo1: resp.r1, justificacion1: resp.j1,
-      riesgo2: resp.r2, justificacion2: resp.j2
+      riesgos
     });
-    if (res && res.ok === false) { showToast('⚠ No se pudo registrar la respuesta.'); }
-    else { resp.sent = true; saveLocal(); showToast('✔ Respuesta enviada'); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    if (res && res.ok === false) {
+      if (res.error === 'no_autorizado') { autorizado = false; render(); showToast('⚠ El facilitador aún no habilita esta sección.'); }
+      else if (res.error === 'incompleto') showToast('⚠ ' + MSG_INCOMPLETO);
+      else showToast('⚠ No se pudo registrar la respuesta.');
+    } else {
+      resp.sent = true; saveLocal(); showToast('✔ Respuesta enviada'); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   } catch (e) {
     console.error(e); showToast('⚠ No se pudo conectar con el servidor. Intente nuevamente.');
   }
@@ -396,17 +515,117 @@ async function sendResponse() {
 
 function changeParticipant() {
   if (!confirm('¿Salir y registrarse con otro nombre en este dispositivo?')) return;
-  clearLocal();
+  clearLocal(); currentScreen = null;
   ['exp-nombre','exp-cargo','exp-empresa'].forEach(id => document.getElementById(id).value = '');
   render();
 }
 
+/* ===================== MODO FACILITADOR ===================== */
+function toggleFacilitador() { isFac ? exitFac() : openPin(); }
+function openPin() {
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').classList.add('hidden');
+  document.getElementById('pin-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('pin-input').focus(), 50);
+}
+function closePin() { document.getElementById('pin-modal').classList.add('hidden'); }
+function pinError(msg) { const e = document.getElementById('pin-error'); e.textContent = '⚠ ' + msg; e.classList.remove('hidden'); }
+
+async function submitPin() {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (!pin) { pinError('Ingrese el PIN.'); return; }
+  const btn = document.getElementById('pin-ok'); btn.disabled = true;
+  try {
+    const d = await apiGet('action=resultados&pin=' + encodeURIComponent(pin));
+    if (d && d.ok) { facPin = pin; closePin(); enterFac(d); }
+    else if (d && d.error === 'pin') pinError('PIN incorrecto.');
+    else pinError('No se pudo validar el PIN.');
+  } catch (e) { console.error(e); pinError('No se pudo conectar con el servidor.'); }
+  btn.disabled = false;
+}
+
+function enterFac(d) {
+  isFac = true; facData = d;
+  document.getElementById('participant-flow').classList.add('hidden');
+  document.getElementById('facilitator-view').classList.remove('hidden');
+  document.getElementById('fac-link').textContent = 'Salir del modo facilitador';
+  renderFac();
+  facTimer = setTimeout(facLoop, POLL_MS);
+}
+function exitFac() {
+  isFac = false; facPin = ''; facData = null; clearTimeout(facTimer);
+  document.getElementById('facilitator-view').classList.add('hidden');
+  document.getElementById('participant-flow').classList.remove('hidden');
+  document.getElementById('fac-link').textContent = 'Modo facilitador';
+  currentScreen = null; render(); pollEstado();
+}
+async function facLoop() {
+  if (!isFac) return;
+  try {
+    const d = await apiGet('action=resultados&pin=' + encodeURIComponent(facPin));
+    if (isFac && d && d.ok) { facData = d; renderFac(); }
+  } catch (e) { console.error(e); }
+  if (isFac) facTimer = setTimeout(facLoop, POLL_MS);
+}
+function refreshFac() { clearTimeout(facTimer); facLoop(); }
+
+async function setAutorizacion(nuevo) {
+  if (!facData) return;
+  if (!nuevo && !confirm('¿Revocar la autorización? Los asistentes volverán a la pantalla de espera.')) return;
+  const btn = document.getElementById('fac-auth-btn'); btn.disabled = true;
+  try {
+    const r = await apiPost({ action: 'set_autorizacion', pin: facPin, autorizado: nuevo });
+    if (r && r.ok === false) showToast('⚠ ' + (r.error === 'pin' ? 'PIN inválido.' : 'No se pudo cambiar la autorización.'));
+    else { facData.autorizado = nuevo; showToast(nuevo ? '✔ Ingreso autorizado' : '↩ Autorización revocada'); }
+  } catch (e) { console.error(e); showToast('⚠ No se pudo conectar con el servidor.'); }
+  btn.disabled = false;
+  renderFac();
+}
+
+function renderFac() {
+  const d = facData || { autorizado: false, asistentes: [], respuestas: [] };
+  const norm = s => String(s || '').trim().toLowerCase();
+  const respondieron = new Set(d.respuestas.map(r => norm(r.nombre)));
+  const nResp = d.asistentes.filter(a => respondieron.has(norm(a.nombre))).length;
+
+  const pill = document.getElementById('fac-pill-sec');
+  pill.textContent = d.autorizado ? '● Ingreso autorizado' : 'Ingreso pendiente de autorización';
+  pill.className = 'fac-pill ' + (d.autorizado ? 'live' : 'off');
+  const btn = document.getElementById('fac-auth-btn');
+  btn.textContent = d.autorizado ? '✔ Ingreso autorizado' : '▶ Autorizar ingreso a esta sección';
+  btn.disabled = !!d.autorizado;
+  btn.classList.toggle('done', !!d.autorizado);
+  document.getElementById('fac-revoke-btn').classList.toggle('hidden', !d.autorizado);
+
+  const filasRiesgos = d.respuestas.map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r.nombre)}</b></td><td>${esc(r.riesgo)}</td><td>${esc(r.causa)}</td><td>${esc(r.consecuencia)}</td></tr>`).join('');
+  const filasAsist = d.asistentes.map(a => `<tr><td><b>${esc(a.nombre)}</b></td><td>${esc(a.cargo)}</td><td>${esc(a.empresa)}</td><td>${respondieron.has(norm(a.nombre)) ? '<span class="lvl-pill lvl-L">✔ Respondió</span>' : '<span class="lvl-pill lvl-M">Pendiente</span>'}</td></tr>`).join('');
+
+  document.getElementById('fac-results').innerHTML = `
+    <div class="fac-title" style="margin-bottom:12px">Resultados · Nuevos riesgos</div>
+    <div class="fac-kpis">
+      <div class="fac-kpi"><div class="k">Asistentes registrados</div><div class="v">${d.asistentes.length}</div></div>
+      <div class="fac-kpi"><div class="k">Han respondido</div><div class="v">${nResp} / ${d.asistentes.length}</div></div>
+      <div class="fac-kpi"><div class="k">Riesgos propuestos ingresados</div><div class="v">${d.respuestas.length}</div></div>
+    </div>
+    <div class="fac-title" style="margin:6px 0">Riesgos propuestos</div>
+    <div class="tbl-wrap">${d.respuestas.length
+      ? `<table class="summary-table fac-summary"><thead><tr><th>#</th><th>Asistente</th><th>Podría ocurrir que (riesgo)</th><th>Debido a (causa)</th><th>Lo que provocaría (consecuencia)</th></tr></thead><tbody>${filasRiesgos}</tbody></table>`
+      : '<div class="results-empty">Aún no hay riesgos ingresados.</div>'}</div>
+    <div class="fac-title" style="margin:20px 0 6px">Asistentes</div>
+    <div class="tbl-wrap">${d.asistentes.length
+      ? `<table class="summary-table fac-summary"><thead><tr><th>Nombre</th><th>Cargo / Rol</th><th>Empresa / Área</th><th>Estado</th></tr></thead><tbody>${filasAsist}</tbody></table>`
+      : '<div class="results-empty">Aún no hay asistentes registrados.</div>'}</div>`;
+}
+
 /* ===================== INICIO ===================== */
-FIELDS.forEach(f => document.getElementById('resp-' + f).addEventListener('input', e => {
+document.querySelectorAll('textarea.lam-box').forEach(el => el.addEventListener('input', () => {
   if (resp.sent) return;
-  resp[f] = e.target.value; saveLocal(); syncOptions();
+  resp.items[Number(el.dataset.i)][el.dataset.campo] = el.value;
+  saveLocal();
+  el.classList.remove('err');
+  if (!document.querySelector('textarea.lam-box.err')) document.getElementById('form-error').classList.add('hidden');
 }));
-['resp-r1','resp-r2'].forEach(id => document.getElementById(id).addEventListener('change', syncOptions));
+document.getElementById('pin-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
 // Abrir con ?reset borra el registro guardado en este navegador (útil para pruebas)
 if (/[?&]reset\b/.test(location.search)) { clearLocal(); history.replaceState(null, '', location.pathname + location.hash); }
 loadLocal();
@@ -416,7 +635,10 @@ if (registered) {
   document.getElementById('exp-empresa').value = participant.empresa;
 }
 render();
-window.addEventListener('hashchange', render);
+pollLoop();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pollEstado(); });
+window.addEventListener('focus', pollEstado);
+window.addEventListener('online', pollEstado);
 </script>
 </body>
 </html>

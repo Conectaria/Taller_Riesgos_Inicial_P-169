@@ -293,7 +293,7 @@
       </div>
     </div>
     <div class="lam-group">
-      <div class="lam-rowtitle">Riesgo 2 (opcional)</div>
+      <div class="lam-rowtitle">Riesgo 2</div>
       <div class="lam-row">
         <div class="lam-cell">
           <div class="lam-head">El riesgo</div>
@@ -537,8 +537,9 @@ async function submitPin() {
   const btn = document.getElementById('pin-ok'); btn.disabled = true;
   try {
     const d = await apiGet('action=resultados&pin=' + encodeURIComponent(pin));
-    if (d && d.ok) { facPin = pin; closePin(); enterFac(d); }
+    if (d && d.ok && Array.isArray(d.asistentes) && Array.isArray(d.respuestas)) { facPin = pin; closePin(); enterFac(d); }
     else if (d && d.error === 'pin') pinError('PIN incorrecto.');
+    else if (d && d.ok) pinError('El servidor (Apps Script) aún no está actualizado. Publique la nueva versión de Code.gs.');
     else pinError('No se pudo validar el PIN.');
   } catch (e) { console.error(e); pinError('No se pudo conectar con el servidor.'); }
   btn.disabled = false;
@@ -575,8 +576,18 @@ async function setAutorizacion(nuevo) {
   const btn = document.getElementById('fac-auth-btn'); btn.disabled = true;
   try {
     const r = await apiPost({ action: 'set_autorizacion', pin: facPin, autorizado: nuevo });
-    if (r && r.ok === false) showToast('⚠ ' + (r.error === 'pin' ? 'PIN inválido.' : 'No se pudo cambiar la autorización.'));
-    else { facData.autorizado = nuevo; showToast(nuevo ? '✔ Ingreso autorizado' : '↩ Autorización revocada'); }
+    if (r && r.ok === false) {
+      showToast('⚠ ' + (r.error === 'pin' ? 'PIN inválido.'
+        : r.error === 'accion_desconocida' ? 'El Apps Script publicado es una versión anterior. Publique la nueva versión de Code.gs.'
+        : 'No se pudo cambiar la autorización.'));
+    } else {
+      // Confirmar con el servidor que la autorización quedó guardada (es lo que consultan los asistentes)
+      const e = await apiGet('action=estado');
+      if (e && e.ok && e.autorizado === nuevo) {
+        facData.autorizado = nuevo;
+        showToast(nuevo ? '✔ Ingreso autorizado: los asistentes ya pueden acceder a la hoja de riesgos' : '↩ Autorización revocada');
+      } else showToast('⚠ El servidor no confirmó la autorización. Verifique que publicó la nueva versión del Apps Script.');
+    }
   } catch (e) { console.error(e); showToast('⚠ No se pudo conectar con el servidor.'); }
   btn.disabled = false;
   renderFac();

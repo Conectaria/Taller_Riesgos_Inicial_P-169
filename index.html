@@ -231,6 +231,31 @@
   .modal-box input { width: 100%; border: 1.5px solid #b9c6fa; border-radius: 6px; padding: 10px 12px; font-size: 18px; letter-spacing: 6px; text-align: center; background: #fffdf5; }
   .modal-box input:focus { outline: none; border-color: #001B66; background: #fff; }
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+  /* ===== Riesgos existentes (causas y tratamientos) ===== */
+  .reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 4px; }
+  textarea.reg-box { width: 100%; min-height: 130px; border: 1.5px solid #b9c6fa; border-radius: 6px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; background: #fffdf5; }
+  textarea.reg-box:focus { outline: none; border-color: #001B66; background: #fff; }
+  textarea.reg-box.err { border-color: #AF1414; background: #fdf2f2; }
+  .reg-count { font-size: 12px; color: #667; margin-top: 8px; line-height: 1.5; }
+  .mis-title { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #001B66; margin: 22px 0 8px; }
+  .mis-item { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; padding: 10px 12px; border: 1.5px solid #e1e7fb; border-left: 4px solid #ED6B0A; border-radius: 6px; margin-bottom: 8px; white-space: pre-wrap; background: #fcfcff; }
+  .mis-n { font-weight: 800; color: #ED6B0A; flex: 0 0 auto; }
+  .next-box { margin-top: 28px; border-top: 2px solid #e8ecfe; padding-top: 20px; text-align: center; }
+  .next-box .locked-msg, .next-box .sent-msg { margin-top: 0; }
+  @media(max-width:640px){ .reg-row { grid-template-columns: 1fr; } }
+  /* ===== Registros por riesgo (facilitador) ===== */
+  .rk-det { border: 1.5px solid #b9c6fa; border-radius: 8px; margin-bottom: 8px; background: #fff; }
+  .rk-det summary { cursor: pointer; padding: 10px 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; list-style: none; }
+  .rk-det summary::-webkit-details-marker { display: none; }
+  .rk-det summary::before { content: '▸'; color: #001B66; font-weight: 800; }
+  .rk-det[open] summary::before { content: '▾'; }
+  .rk-det[open] summary { border-bottom: 1.5px solid #e8ecfe; margin-bottom: 8px; }
+  .rk-det .risk-id-badge { margin-bottom: 0; }
+  .rk-det .rk-t { flex: 1 1 260px; font-weight: 700; color: #001B66; font-size: 14px; }
+  .rk-n { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; background: #f3f3f3; color: #666; border: 1.5px solid #ccc; white-space: nowrap; }
+  .rk-n.on { background: #d4edda; color: #155724; border-color: #9fd3ab; }
+  .rk-det .tbl-wrap { padding: 0 12px 12px; }
 </style>
 </head>
 <body>
@@ -260,13 +285,36 @@
     <button class="btn-start" id="btn-start" onclick="startSession()">Registrarme</button>
   </div>
 
-  <!-- PANTALLA 1B: Mensaje tras el registro (espera autorización del facilitador) -->
-  <div id="screen-wait" class="summary-box hidden" style="margin-top:16px">
-    <h2>✔ Registro exitoso</h2>
-    <p style="font-size:16px;color:#1a2636;font-weight:600;margin-bottom:0">¡Gracias por tu participación!<br>En breve continuaremos con la presentación</p>
+  <!-- PANTALLA 2: Riesgos existentes -> causa(s) y tratamiento(s) -->
+  <div id="screen-riesgos" class="risk-card hidden" style="margin-top:16px">
+    <div class="lam-title">Seleccione un riesgo y registre sus causa(s) y tratamiento(s)</div>
+    <div class="q-block" style="margin-bottom:6px">
+      <select class="q-select" id="sel-riesgo"></select>
+      <div class="reg-count" id="reg-count"></div>
+    </div>
+    <div id="reg-work" class="hidden">
+      <div class="risk-tags" style="margin-top:18px"><div class="risk-id-badge" id="reg-badge"></div></div>
+      <div class="risk-title" id="reg-titulo"></div>
+      <div class="reg-row">
+        <div class="lam-cell">
+          <div class="lam-head" style="margin-bottom:8px">Causa(s)</div>
+          <textarea class="reg-box" id="reg-causa" placeholder="Describa la(s) causa(s) del riesgo..."></textarea>
+        </div>
+        <div class="lam-cell">
+          <div class="lam-head" style="margin-bottom:8px">Tratamiento(s)</div>
+          <textarea class="reg-box" id="reg-trat" placeholder="Describa el/los tratamiento(s) propuesto(s)..."></textarea>
+        </div>
+      </div>
+      <div class="form-error hidden" id="reg-error"></div>
+      <div class="nav-area single">
+        <button class="btn-nav btn-next" id="btn-reg" onclick="registrarRiesgo()">Registrar →</button>
+      </div>
+      <div id="mis-reg"></div>
+    </div>
+    <div class="next-box" id="next-box"></div>
   </div>
 
-  <!-- PANTALLA 2: Lámina nuevos riesgos -->
+  <!-- PANTALLA 3: Lámina nuevos riesgos (se habilita desde el modo facilitador) -->
   <div id="screen-form" class="risk-card hidden" style="margin-top:16px">
     <div class="lam-title">¿Qué otros riesgos estima necesario incorporar?</div>
     <div class="lam-group">
@@ -316,15 +364,16 @@
       </div>
     </div>
     <div class="form-error hidden" id="form-error"></div>
-    <div class="nav-area single">
+    <div class="nav-area">
+      <button class="btn-nav btn-prev" onclick="volverRiesgos()">← Volver a los riesgos</button>
       <button class="btn-nav btn-next" id="btn-send" onclick="sendResponse()">Enviar respuesta →</button>
     </div>
   </div>
 
-  <!-- PANTALLA 3: Cierre -->
+  <!-- PANTALLA 4: Cierre -->
   <div id="screen-thanks" class="summary-box hidden" style="margin-top:16px">
     <h2>✔ Respuesta registrada</h2>
-    <p>Gracias por su participación.</p>
+    <p style="font-size:16px;color:#1a2636;font-weight:600">¡Gracias por tu participación!<br>En breve continuaremos con la presentación</p>
     <a href="#" onclick="changeParticipant();return false;" style="font-size:12px;color:#5271FF">¿Otro participante en este dispositivo? Registrar</a>
   </div>
   </div><!-- /participant-flow -->
@@ -337,7 +386,7 @@
         <div class="fac-status"><span class="fac-pill off" id="fac-pill-sec">—</span></div>
       </div>
       <div class="auth-box">
-        <div class="auth-text"><b>Autorizar ingreso a la sección «Nuevos riesgos»</b><br>Autorice el ingreso <u>después de que los asistentes se hayan registrado</u>: verán en sus pantallas la lámina «¿Qué otros riesgos estima necesario incorporar?».</div>
+        <div class="auth-text"><b>Autorizar ingreso a la sección «Nuevos riesgos»</b><br>Los asistentes registran causa(s) y tratamiento(s) de cada riesgo a su ritmo. Cuando quiera pasar a la última sección, autorice el ingreso: se habilitará el botón «Continuar a Nuevos riesgos» en sus pantallas.</div>
         <button class="fac-main-btn" id="fac-auth-btn" onclick="setAutorizacion(true)">▶ Autorizar ingreso a esta sección</button>
       </div>
       <div class="fac-controls">
@@ -368,33 +417,55 @@
 <script>
 /* ===================== CONFIGURACIÓN ===================== */
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyswfunW2gzrtN6O4H1KJ_KfytLSdzGHh-FchdB0Oikp6CrtvgHjrS-qF4HbNE38r0Jrw/exec';
-const LS_KEY = 'sar_taller_final_v3';
+const LS_KEY = 'sar_taller_final_v4';
 const POLL_MS = 4000;          // consulta al servidor (participantes y facilitador)
 const CAMPOS = ['riesgo', 'causa', 'consecuencia'];
 const MSG_INCOMPLETO = 'Es necesario completar los 3 cuadros (riesgo, causa y consecuencia) para ingresar el riesgo.';
+const MSG_REG_INCOMPLETO = 'Escriba al menos una causa o un tratamiento para registrar el riesgo.';
+const MSG_SERVIDOR_VIEJO = 'El Apps Script publicado es una versión anterior. Publique la nueva versión de Code.gs.';
+
+// Riesgos existentes (lista desplegable)
+const RIESGOS = [
+  { id: '3545', titulo: 'Desempeño deficiente de contratistas (ingeniería de detalle)' },
+  { id: '3546', titulo: 'Retraso proyecto DAND restitución camino Riecillos y mejoramiento de túneles 1, 2 y 3 STR' },
+  { id: '3569', titulo: 'Alto nivel de interferencia con la operación del STR durante la construcción' },
+  { id: '3575', titulo: 'Afectación en hallazgos arqueológicos y/o nuevos hallazgos no previstos' },
+  { id: '3586', titulo: 'Retraso en la obtención de permisos sectoriales' },
+  { id: '3990', titulo: 'Incumplimiento plan BOOT' },
+  { id: '4075', titulo: 'Atraso en la negociación y firma del contrato BOOT con el Desarrollador' },
+  { id: '4124', titulo: 'Comité de ministros rechaza parcial o total la RCA' }
+];
+const riesgoById = id => RIESGOS.find(r => r.id === String(id));
 
 /* ===================== ESTADO ===================== */
 const blank = () => ({ riesgo: '', causa: '', consecuencia: '' });
 const EMPTY = () => ({ items: [blank(), blank()], sent: false });
 let participant = { nombre: '', cargo: '', empresa: '' };
 let registered = false;
-let resp = EMPTY();
-let autorizado = false;        // sección «Nuevos riesgos» autorizada por el facilitador
+let resp = EMPTY();            // hoja «Nuevos riesgos»
+let regs = [];                 // registros (causa/tratamiento) enviados por este asistente: {rid, causa, tratamiento}
+let drafts = {};               // borradores por riesgo: { id: {causa, tratamiento} }
+let selRid = '';               // riesgo seleccionado en la lista
+let view = 'riesgos';          // 'riesgos' | 'nuevos'
+let autorizado = false;        // paso a «Nuevos riesgos» autorizado por el facilitador
 let currentScreen = null;
-let isFac = false, facPin = '', facTimer = null, facData = null;
+let isFac = false, facPin = '', facTimer = null, facData = null, lastFacHtml = '';
+const facOpen = new Set();     // riesgos desplegados en el panel del facilitador
 
-function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ participant, registered, resp })); } catch (e) {} }
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ participant, registered, resp, regs, drafts, selRid, view })); } catch (e) {} }
 function loadLocal() {
   try {
     const d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-    if (d) {
-      participant = d.participant || participant; registered = !!d.registered;
-      if (d.resp && Array.isArray(d.resp.items) && d.resp.items.length === 2) resp = d.resp;
-    }
+    if (!d) return;
+    participant = d.participant || participant; registered = !!d.registered;
+    if (d.resp && Array.isArray(d.resp.items) && d.resp.items.length === 2) resp = d.resp;
+    regs = Array.isArray(d.regs) ? d.regs : []; drafts = d.drafts || {};
+    selRid = d.selRid || ''; view = d.view === 'nuevos' ? 'nuevos' : 'riesgos';
   } catch (e) {}
 }
 function clearLocal() {
   participant = { nombre: '', cargo: '', empresa: '' }; registered = false; resp = EMPTY();
+  regs = []; drafts = {}; selRid = ''; view = 'riesgos';
   try { localStorage.removeItem(LS_KEY); } catch (e) {}
 }
 function showToast(msg) {
@@ -413,20 +484,118 @@ async function apiPost(body) {
 }
 
 /* ===================== PARTICIPANTE ===================== */
-function show(id) {
-  ['screen-intro','screen-wait','screen-form','screen-thanks'].forEach(s =>
-    document.getElementById(s).classList.toggle('hidden', s !== id));
-}
+const SCREENS = ['screen-intro', 'screen-riesgos', 'screen-form', 'screen-thanks'];
+function show(id) { SCREENS.forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id)); }
+
 function render() {
   if (isFac) return;
   let target;
   if (!registered) target = 'screen-intro';
   else if (resp.sent) target = 'screen-thanks';
-  else if (!autorizado) target = 'screen-wait';
-  else target = 'screen-form';
+  else if (view === 'nuevos' && autorizado) target = 'screen-form';
+  else target = 'screen-riesgos';
   if (target === 'screen-form' && currentScreen !== 'screen-form') fillForm();
+  if (target === 'screen-riesgos') {
+    if (currentScreen !== 'screen-riesgos') enterRiesgos(); else renderNext();
+  }
   show(target); currentScreen = target;
 }
+
+/* --- Riesgos existentes --- */
+function enterRiesgos() { buildSelect(); loadDraft(); renderRiesgoWork(); renderNext(); }
+
+function buildSelect() {
+  const sel = document.getElementById('sel-riesgo');
+  sel.innerHTML = '<option value="">Seleccione un riesgo...</option>' + RIESGOS.map(r => {
+    const n = regs.filter(x => x.rid === r.id).length;
+    return `<option value="${r.id}">${r.id} · ${esc(r.titulo)}${n ? ` — ${n} registro${n > 1 ? 's' : ''}` : ''}</option>`;
+  }).join('');
+  sel.value = selRid;
+}
+function onSelectRiesgo() {
+  selRid = document.getElementById('sel-riesgo').value;
+  saveLocal(); loadDraft(); renderRiesgoWork();
+}
+function loadDraft() {
+  const d = drafts[selRid] || {};
+  document.getElementById('reg-causa').value = d.causa || '';
+  document.getElementById('reg-trat').value = d.tratamiento || '';
+  clearRegErrors();
+}
+function clearRegErrors() {
+  ['reg-causa', 'reg-trat'].forEach(id => document.getElementById(id).classList.remove('err'));
+  document.getElementById('reg-error').classList.add('hidden');
+}
+function renderRiesgoWork() {
+  const rk = riesgoById(selRid);
+  document.getElementById('reg-work').classList.toggle('hidden', !rk);
+  if (rk) {
+    document.getElementById('reg-badge').textContent = 'ID ' + rk.id;
+    document.getElementById('reg-titulo').textContent = rk.titulo;
+  }
+  renderMis(); updateCount();
+}
+function renderMis() {
+  const list = regs.filter(r => r.rid === selRid);
+  document.getElementById('mis-reg').innerHTML = list.length
+    ? `<div class="mis-title">Mis registros en este riesgo (${list.length})</div>` +
+      list.map((r, i) => `<div class="mis-item"><div class="mis-n">#${i + 1}</div><div>${[r.causa ? '<b>Causa(s):</b> ' + esc(r.causa) : '', r.tratamiento ? '<b>Tratamiento(s):</b> ' + esc(r.tratamiento) : ''].filter(Boolean).join('\n')}</div></div>`).join('')
+    : '';
+}
+function updateCount() {
+  const n = regs.length, m = new Set(regs.map(r => r.rid)).size;
+  document.getElementById('reg-count').textContent = n
+    ? `Sus registros: ${n} en ${m} riesgo${m > 1 ? 's' : ''}. Puede volver a cualquier riesgo y registrar las veces que estime necesario.`
+    : 'Puede registrar las veces que estime necesario en cada riesgo y volver a los otros riesgos cuando desee.';
+}
+function renderNext() {
+  document.getElementById('next-box').innerHTML = autorizado
+    ? '<div class="sent-msg">✔ El facilitador habilitó la siguiente sección</div><div style="margin-top:14px"><button class="btn-nav btn-finish" onclick="irNuevos()">Continuar a Nuevos riesgos →</button></div>'
+    : '<div class="locked-msg">🔒 El facilitador habilitará la siguiente sección (Nuevos riesgos)</div>';
+}
+
+async function registrarRiesgo() {
+  const rk = riesgoById(selRid); if (!rk) return;
+  const c = document.getElementById('reg-causa'), t = document.getElementById('reg-trat');
+  const causa = c.value.trim(), trat = t.value.trim();
+  clearRegErrors();
+  if (!causa && !trat) {
+    c.classList.add('err'); t.classList.add('err');
+    const box = document.getElementById('reg-error');
+    box.textContent = '⚠ ' + MSG_REG_INCOMPLETO; box.classList.remove('hidden');
+    showToast('⚠ ' + MSG_REG_INCOMPLETO);
+    c.focus();
+    return;
+  }
+  const btn = document.getElementById('btn-reg'); btn.disabled = true;
+  try {
+    const r = await apiPost({ action: 'submit_registro_riesgo', nombre: participant.nombre,
+      riesgoId: rk.id, riesgoTitulo: rk.titulo, causa, tratamiento: trat });
+    if (r && r.ok === false) {
+      showToast('⚠ ' + (r.error === 'accion_desconocida' ? MSG_SERVIDOR_VIEJO
+        : r.error === 'incompleto' ? 'El servidor rechazó el registro. Si escribió solo un bloque, publique la nueva versión de Code.gs.'
+        : 'No se pudo guardar el registro.'));
+    } else {
+      regs.push({ rid: rk.id, causa, tratamiento: trat });
+      delete drafts[rk.id]; c.value = ''; t.value = '';
+      saveLocal(); buildSelect(); renderRiesgoWork();
+      showToast('✔ Registro guardado en el riesgo ' + rk.id + '. Puede agregar otro o elegir un riesgo distinto.');
+    }
+  } catch (e) { console.error(e); showToast('⚠ No se pudo conectar con el servidor. Intente nuevamente.'); }
+  btn.disabled = false;
+}
+
+function irNuevos() {
+  if (!autorizado) return;
+  view = 'nuevos'; saveLocal(); currentScreen = null; render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function volverRiesgos() {
+  collect(); view = 'riesgos'; saveLocal(); currentScreen = null; render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* --- Nuevos riesgos (lámina) --- */
 function fieldEl(i, c) { return document.getElementById('f-' + i + '-' + c); }
 function fillForm() {
   resp.items.forEach((it, i) => CAMPOS.forEach(c => fieldEl(i, c).value = it[c]));
@@ -436,39 +605,9 @@ function clearErrors() {
   document.querySelectorAll('textarea.lam-box.err').forEach(el => el.classList.remove('err'));
   document.getElementById('form-error').classList.add('hidden');
 }
-
-async function pollEstado() {
-  if (isFac || !registered || resp.sent) return;
-  try {
-    const d = await apiGet('action=estado');
-    if (d && d.ok) {
-      const a = !!d.autorizado;
-      if (a !== autorizado) { autorizado = a; render(); }
-    }
-  } catch (e) { console.error('Error consultando estado:', e); }
-}
-async function pollLoop() { await pollEstado(); setTimeout(pollLoop, POLL_MS); }
-
-async function startSession() {
-  const nombre = document.getElementById('exp-nombre').value.trim();
-  const cargo = document.getElementById('exp-cargo').value.trim();
-  const empresa = document.getElementById('exp-empresa').value.trim();
-  if (!nombre || !cargo || !empresa) { showToast('⚠ Complete los datos del participante.'); return; }
-  const btn = document.getElementById('btn-start'); btn.disabled = true;
-  try {
-    const r = await apiPost({ action: 'register', nombre, cargo, empresa });
-    if (r && r.ok === false) throw new Error(r.error || 'registro');
-    participant = { nombre, cargo, empresa };
-    registered = true; resp = EMPTY(); currentScreen = null;
-    saveLocal(); render(); pollEstado();
-  } catch (e) {
-    console.error(e); showToast('⚠ No se pudo conectar con el servidor. Intente nuevamente.');
-  }
-  btn.disabled = false;
-}
-
 function collect() {
   resp.items.forEach((it, i) => CAMPOS.forEach(c => it[c] = fieldEl(i, c).value.trim()));
+  saveLocal();
 }
 function validar() {
   collect(); clearErrors();
@@ -513,6 +652,38 @@ async function sendResponse() {
   btn.disabled = false;
 }
 
+/* --- Registro y sincronización --- */
+async function pollEstado() {
+  if (isFac || !registered || resp.sent) return;
+  try {
+    const d = await apiGet('action=estado');
+    if (d && d.ok) {
+      const a = !!d.autorizado;
+      if (a !== autorizado) { autorizado = a; render(); }
+    }
+  } catch (e) { console.error('Error consultando estado:', e); }
+}
+async function pollLoop() { await pollEstado(); setTimeout(pollLoop, POLL_MS); }
+
+async function startSession() {
+  const nombre = document.getElementById('exp-nombre').value.trim();
+  const cargo = document.getElementById('exp-cargo').value.trim();
+  const empresa = document.getElementById('exp-empresa').value.trim();
+  if (!nombre || !cargo || !empresa) { showToast('⚠ Complete los datos del participante.'); return; }
+  const btn = document.getElementById('btn-start'); btn.disabled = true;
+  try {
+    const r = await apiPost({ action: 'register', nombre, cargo, empresa });
+    if (r && r.ok === false) throw new Error(r.error || 'registro');
+    participant = { nombre, cargo, empresa };
+    registered = true; resp = EMPTY(); regs = []; drafts = {}; selRid = ''; view = 'riesgos'; currentScreen = null;
+    saveLocal(); render(); pollEstado();
+    showToast('✔ Registro exitoso');
+  } catch (e) {
+    console.error(e); showToast('⚠ No se pudo conectar con el servidor. Intente nuevamente.');
+  }
+  btn.disabled = false;
+}
+
 function changeParticipant() {
   if (!confirm('¿Salir y registrarse con otro nombre en este dispositivo?')) return;
   clearLocal(); currentScreen = null;
@@ -537,7 +708,7 @@ async function submitPin() {
   const btn = document.getElementById('pin-ok'); btn.disabled = true;
   try {
     const d = await apiGet('action=resultados&pin=' + encodeURIComponent(pin));
-    if (d && d.ok && Array.isArray(d.asistentes) && Array.isArray(d.respuestas)) { facPin = pin; closePin(); enterFac(d); }
+    if (d && d.ok && Array.isArray(d.asistentes) && Array.isArray(d.respuestas) && Array.isArray(d.registros)) { facPin = pin; closePin(); enterFac(d); }
     else if (d && d.error === 'pin') pinError('PIN incorrecto.');
     else if (d && d.ok) pinError('El servidor (Apps Script) aún no está actualizado. Publique la nueva versión de Code.gs.');
     else pinError('No se pudo validar el PIN.');
@@ -546,7 +717,7 @@ async function submitPin() {
 }
 
 function enterFac(d) {
-  isFac = true; facData = d;
+  isFac = true; facData = d; lastFacHtml = '';
   document.getElementById('participant-flow').classList.add('hidden');
   document.getElementById('facilitator-view').classList.remove('hidden');
   document.getElementById('fac-link').textContent = 'Salir del modo facilitador';
@@ -564,7 +735,7 @@ async function facLoop() {
   if (!isFac) return;
   try {
     const d = await apiGet('action=resultados&pin=' + encodeURIComponent(facPin));
-    if (isFac && d && d.ok) { facData = d; renderFac(); }
+    if (isFac && d && d.ok && Array.isArray(d.registros)) { facData = d; renderFac(); }
   } catch (e) { console.error(e); }
   if (isFac) facTimer = setTimeout(facLoop, POLL_MS);
 }
@@ -572,20 +743,18 @@ function refreshFac() { clearTimeout(facTimer); facLoop(); }
 
 async function setAutorizacion(nuevo) {
   if (!facData) return;
-  if (!nuevo && !confirm('¿Revocar la autorización? Los asistentes volverán a la pantalla de espera.')) return;
+  if (!nuevo && !confirm('¿Revocar la autorización? Los asistentes dejarán de poder pasar a Nuevos riesgos.')) return;
   const btn = document.getElementById('fac-auth-btn'); btn.disabled = true;
   try {
     const r = await apiPost({ action: 'set_autorizacion', pin: facPin, autorizado: nuevo });
     if (r && r.ok === false) {
-      showToast('⚠ ' + (r.error === 'pin' ? 'PIN inválido.'
-        : r.error === 'accion_desconocida' ? 'El Apps Script publicado es una versión anterior. Publique la nueva versión de Code.gs.'
-        : 'No se pudo cambiar la autorización.'));
+      showToast('⚠ ' + (r.error === 'pin' ? 'PIN inválido.' : r.error === 'accion_desconocida' ? MSG_SERVIDOR_VIEJO : 'No se pudo cambiar la autorización.'));
     } else {
       // Confirmar con el servidor que la autorización quedó guardada (es lo que consultan los asistentes)
       const e = await apiGet('action=estado');
       if (e && e.ok && e.autorizado === nuevo) {
         facData.autorizado = nuevo;
-        showToast(nuevo ? '✔ Ingreso autorizado: los asistentes ya pueden acceder a la hoja de riesgos' : '↩ Autorización revocada');
+        showToast(nuevo ? '✔ Ingreso autorizado: los asistentes ya pueden pasar a Nuevos riesgos' : '↩ Autorización revocada');
       } else showToast('⚠ El servidor no confirmó la autorización. Verifique que publicó la nueva versión del Apps Script.');
     }
   } catch (e) { console.error(e); showToast('⚠ No se pudo conectar con el servidor.'); }
@@ -594,7 +763,7 @@ async function setAutorizacion(nuevo) {
 }
 
 function renderFac() {
-  const d = facData || { autorizado: false, asistentes: [], respuestas: [] };
+  const d = facData || { autorizado: false, asistentes: [], respuestas: [], registros: [] };
   const norm = s => String(s || '').trim().toLowerCase();
   const respondieron = new Set(d.respuestas.map(r => norm(r.nombre)));
   const nResp = d.asistentes.filter(a => respondieron.has(norm(a.nombre))).length;
@@ -608,27 +777,43 @@ function renderFac() {
   btn.classList.toggle('done', !!d.autorizado);
   document.getElementById('fac-revoke-btn').classList.toggle('hidden', !d.autorizado);
 
+  const registros = d.registros || [];
+  const detalle = RIESGOS.map(rk => {
+    const list = registros.filter(x => String(x.riesgoId) === rk.id);
+    const filas = list.map((x, i) => `<tr><td>${i + 1}</td><td><b>${esc(x.nombre)}</b></td><td>${esc(x.causa) || '—'}</td><td>${esc(x.tratamiento) || '—'}</td></tr>`).join('');
+    return `<details class="rk-det" data-rid="${rk.id}" ${facOpen.has(rk.id) ? 'open' : ''}>
+      <summary><span class="risk-id-badge">ID ${rk.id}</span><span class="rk-t">${esc(rk.titulo)}</span><span class="rk-n ${list.length ? 'on' : ''}">${list.length} registro${list.length === 1 ? '' : 's'}</span></summary>
+      ${list.length ? `<div class="tbl-wrap"><table class="summary-table fac-summary"><thead><tr><th>#</th><th>Asistente</th><th>Causa(s)</th><th>Tratamiento(s)</th></tr></thead><tbody>${filas}</tbody></table></div>`
+        : '<div class="results-empty" style="padding:0 14px 12px">Aún no hay registros para este riesgo.</div>'}
+    </details>`;
+  }).join('');
+
   const filasRiesgos = d.respuestas.map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r.nombre)}</b></td><td>${esc(r.riesgo)}</td><td>${esc(r.causa)}</td><td>${esc(r.consecuencia)}</td></tr>`).join('');
   const filasAsist = d.asistentes.map(a => `<tr><td><b>${esc(a.nombre)}</b></td><td>${esc(a.cargo)}</td><td>${esc(a.empresa)}</td><td>${respondieron.has(norm(a.nombre)) ? '<span class="lvl-pill lvl-L">✔ Respondió</span>' : '<span class="lvl-pill lvl-M">Pendiente</span>'}</td></tr>`).join('');
 
-  document.getElementById('fac-results').innerHTML = `
-    <div class="fac-title" style="margin-bottom:12px">Resultados · Nuevos riesgos</div>
+  const html = `
+    <div class="fac-title" style="margin-bottom:12px">Resultados</div>
     <div class="fac-kpis">
       <div class="fac-kpi"><div class="k">Asistentes registrados</div><div class="v">${d.asistentes.length}</div></div>
-      <div class="fac-kpi"><div class="k">Han respondido</div><div class="v">${nResp} / ${d.asistentes.length}</div></div>
+      <div class="fac-kpi"><div class="k">Registros en riesgos</div><div class="v">${registros.length}</div></div>
       <div class="fac-kpi"><div class="k">Riesgos propuestos ingresados</div><div class="v">${d.respuestas.length}</div></div>
+      <div class="fac-kpi"><div class="k">Han respondido Nuevos riesgos</div><div class="v">${nResp} / ${d.asistentes.length}</div></div>
     </div>
-    <div class="fac-title" style="margin:6px 0">Riesgos propuestos</div>
+    <div class="fac-title" style="margin:6px 0 8px">Registros por riesgo <span style="font-weight:600;letter-spacing:0;text-transform:none;color:#666">· haga clic en un riesgo para ver sus registros</span></div>
+    ${detalle}
+    <div class="fac-title" style="margin:22px 0 6px">Nuevos riesgos propuestos</div>
     <div class="tbl-wrap">${d.respuestas.length
       ? `<table class="summary-table fac-summary"><thead><tr><th>#</th><th>Asistente</th><th>Podría ocurrir que (riesgo)</th><th>Debido a (causa)</th><th>Lo que provocaría (consecuencia)</th></tr></thead><tbody>${filasRiesgos}</tbody></table>`
       : '<div class="results-empty">Aún no hay riesgos ingresados.</div>'}</div>
     <div class="fac-title" style="margin:20px 0 6px">Asistentes</div>
     <div class="tbl-wrap">${d.asistentes.length
-      ? `<table class="summary-table fac-summary"><thead><tr><th>Nombre</th><th>Cargo / Rol</th><th>Empresa / Área</th><th>Estado</th></tr></thead><tbody>${filasAsist}</tbody></table>`
+      ? `<table class="summary-table fac-summary"><thead><tr><th>Nombre</th><th>Cargo / Rol</th><th>Empresa / Área</th><th>Estado (Nuevos riesgos)</th></tr></thead><tbody>${filasAsist}</tbody></table>`
       : '<div class="results-empty">Aún no hay asistentes registrados.</div>'}</div>`;
+  if (html !== lastFacHtml) { document.getElementById('fac-results').innerHTML = html; lastFacHtml = html; }
 }
 
 /* ===================== INICIO ===================== */
+// Nuevos riesgos: guardar lo escrito y limpiar errores
 document.querySelectorAll('textarea.lam-box').forEach(el => el.addEventListener('input', () => {
   if (resp.sent) return;
   resp.items[Number(el.dataset.i)][el.dataset.campo] = el.value;
@@ -636,7 +821,20 @@ document.querySelectorAll('textarea.lam-box').forEach(el => el.addEventListener(
   el.classList.remove('err');
   if (!document.querySelector('textarea.lam-box.err')) document.getElementById('form-error').classList.add('hidden');
 }));
+// Riesgos existentes: borrador por riesgo
+['reg-causa', 'reg-trat'].forEach(id => document.getElementById(id).addEventListener('input', () => {
+  if (!selRid) return;
+  drafts[selRid] = { causa: document.getElementById('reg-causa').value, tratamiento: document.getElementById('reg-trat').value };
+  saveLocal(); document.getElementById(id).classList.remove('err');
+  if (!document.querySelector('textarea.reg-box.err')) document.getElementById('reg-error').classList.add('hidden');
+}));
+document.getElementById('sel-riesgo').addEventListener('change', onSelectRiesgo);
 document.getElementById('pin-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
+// Recordar qué riesgos están desplegados en el panel del facilitador (el evento toggle no burbujea)
+document.getElementById('fac-results').addEventListener('toggle', e => {
+  const d = e.target;
+  if (d && d.dataset && d.dataset.rid) { d.open ? facOpen.add(d.dataset.rid) : facOpen.delete(d.dataset.rid); }
+}, true);
 // Abrir con ?reset borra el registro guardado en este navegador (útil para pruebas)
 if (/[?&]reset\b/.test(location.search)) { clearLocal(); history.replaceState(null, '', location.pathname + location.hash); }
 loadLocal();
